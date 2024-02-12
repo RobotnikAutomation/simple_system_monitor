@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from email_sender import SimpleEmailSender
+from simple_system_monitor import SimpleSystemMonitor
 
 
 def main():
 
     rospy.init_node("simple_email_sender")
 
-    rc_node = SimpleEmailSender()
+    rc_node = SimpleSystemMonitor()
 
     rospy.loginfo('%s: starting' % (rospy.get_name()))
 
