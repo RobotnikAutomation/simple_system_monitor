@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import threading
 import psutil
 import time
 import rospy
@@ -18,13 +17,11 @@ class SimpleSystemMonitor(RComponent):
         self.memory_capacity = 0.
         self.memory_usage = 0.
         self.cpu_usage = 0.
-        self.cpu_temperatures = dict()
+        self.core_temperatures = list()
 
     def ros_read_params(self) -> None:
         """"""
         RComponent.ros_read_params(self)
-
-        self.update_hz = rospy.get_param('update_hz', '2')
 
     def ros_setup(self) -> None:
         """"""
@@ -47,7 +44,8 @@ class SimpleSystemMonitor(RComponent):
         system_status.memory_capacity = self.memory_capacity
         system_status.memory_usage = self.memory_usage
         system_status.cpu_usage = self.cpu_usage
-        system_status.cpu_temperature = self.cpu_temperatures
+        system_status.core_temperatures = self.core_temperatures
+        system_status.timestamp = str(time.time())
 
         self.simple_system_status_publisher.publish(system_status)
 
@@ -55,16 +53,7 @@ class SimpleSystemMonitor(RComponent):
         """"""
         RComponent.ready_state(self)
 
-        publish_system_status_thread = threading.Thread(target=self.publish_system_status, daemon=True)
-        publish_system_status_thread.start()
-
-    def publish_system_status(self):
-        """"""
-        while True:
-            self.update_system_status()
-            self.ros_publish()
-            time.sleep(1 / self.update_hz)
-            break
+        self.update_system_status()
     
     def update_system_status(self):
         """"""
@@ -90,4 +79,4 @@ class SimpleSystemMonitor(RComponent):
         keys = [f'Core {key}' for key in keys]
         cpu_temperatures = {i: cpu_temperatures[i] for i in keys}
 
-        self.cpu_temperatures = [cpu_temperature for cpu_temperature in cpu_temperatures.values()]
+        self.core_temperatures = [cpu_temperature for cpu_temperature in cpu_temperatures.values()]
