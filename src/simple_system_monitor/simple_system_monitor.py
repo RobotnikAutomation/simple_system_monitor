@@ -12,11 +12,12 @@ class SimpleSystemMonitor(RComponent):
         RComponent.__init__(self)
         self.logger = RComponent.initialize_logger(self)
 
-        self.disk_capacity = 0.
-        self.disk_usage = 0.
-        self.memory_capacity = 0.
-        self.memory_usage = 0.
-        self.cpu_usage = 0.
+        self.disk_capacity = -1.
+        self.disk_usage = -1.
+        self.memory_capacity = -1.
+        self.memory_usage = -1.
+        self.cpu_usage = -1.
+        self.cpu_temperature = -1.
         self.core_temperatures = list()
 
     def ros_read_params(self) -> None:
@@ -45,6 +46,7 @@ class SimpleSystemMonitor(RComponent):
         system_status.memory_usage = self.memory_usage
         system_status.cpu_usage = self.cpu_usage
         system_status.core_temperatures = self.core_temperatures
+        system_status.cpu_temperature = self.cpu_temperature
         system_status.timestamp = str(time.time())
 
         self.simple_system_status_publisher.publish(system_status)
@@ -72,6 +74,8 @@ class SimpleSystemMonitor(RComponent):
         for sensor_data in psutil.sensors_temperatures()['coretemp']:
             if 'core' in sensor_data.label.lower():
                 cpu_temperatures[sensor_data.label] = sensor_data.current
+            elif 'Package id 0' == sensor_data.label:
+                self.cpu_temperature = sensor_data.current
 
         # Order the dictionary as list to get the temperature for ordered cores
         keys = [int(key[5:]) for key in cpu_temperatures.keys()]
@@ -79,4 +83,4 @@ class SimpleSystemMonitor(RComponent):
         keys = [f'Core {key}' for key in keys]
         cpu_temperatures = {i: cpu_temperatures[i] for i in keys}
 
-        self.core_temperatures = [cpu_temperature for cpu_temperature in cpu_temperatures.values()]
+        self.core_temperatures = [cpu_temp for cpu_temp in cpu_temperatures.values()]
