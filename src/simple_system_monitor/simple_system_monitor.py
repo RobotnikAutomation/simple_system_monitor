@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-import psutil
+"""simple_system_monitor ROS node"""
+
 import time
+import psutil
 import rospy
-from rcomponent.rcomponent import RComponent
+from rcomponent.rcomponent import RComponent # pylint: disable=import-error, no-name-in-module
 from robotnik_msgs.msg import SimpleSystemStatus
 
 
-class SimpleSystemMonitor(RComponent):
+class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attributes
+    """SimpleSystemMonitor class, which contains all the logic of the simple_system_monitor ROS node"""
 
     def __init__(self):
         RComponent.__init__(self)
@@ -18,25 +21,25 @@ class SimpleSystemMonitor(RComponent):
         self.memory_usage = -1.
         self.cpu_usage = -1.
         self.cpu_temperature = -1.
-        self.core_temperatures = list()
+        self.core_temperatures = []
+        self.simple_system_status_publisher = None
 
     def ros_read_params(self) -> None:
-        """"""
+        """Gets params from param server"""
         RComponent.ros_read_params(self)
 
     def ros_setup(self) -> None:
-        """"""
+        """Creates and inits ROS components"""
         RComponent.ros_setup(self)
 
         self.simple_system_status_publisher = rospy.Publisher('~system_status', SimpleSystemStatus, queue_size=10)
 
     def init_state(self) -> None:
-        """
-        """
+        """Actions performed in init state"""
         return RComponent.init_state(self)
-    
+
     def ros_publish(self):
-        """"""
+        """Publish to ROS topics"""
         RComponent.ros_publish(self)
 
         system_status = SimpleSystemStatus()
@@ -52,13 +55,13 @@ class SimpleSystemMonitor(RComponent):
         self.simple_system_status_publisher.publish(system_status)
 
     def ready_state(self):
-        """"""
+        """Actions performed in ready state"""
         RComponent.ready_state(self)
 
         self.update_system_status()
-    
+
     def update_system_status(self):
-        """"""
+        """Updates the system status readings"""
         # Update disk capacity and usage
         self.disk_capacity = psutil.disk_usage('/').total / 1e9
         self.disk_usage = psutil.disk_usage('/').percent
@@ -68,9 +71,8 @@ class SimpleSystemMonitor(RComponent):
         self.memory_usage = psutil.virtual_memory().percent
 
         # Update CPU usage and temperature
-        # TODO: check psutil outputs for non-INtel CPUs
         self.cpu_usage = psutil.cpu_percent()
-        cpu_temperatures = dict()
+        cpu_temperatures = {}
         for sensor_data in psutil.sensors_temperatures()['coretemp']:
             if 'core' in sensor_data.label.lower():
                 cpu_temperatures[sensor_data.label] = sensor_data.current
@@ -78,9 +80,9 @@ class SimpleSystemMonitor(RComponent):
                 self.cpu_temperature = sensor_data.current
 
         # Order the dictionary as list to get the temperature for ordered cores
-        keys = [int(key[5:]) for key in cpu_temperatures.keys()]
+        keys = [int(key[5:]) for key in cpu_temperatures]
         keys.sort()
         keys = [f'Core {key}' for key in keys]
         cpu_temperatures = {i: cpu_temperatures[i] for i in keys}
 
-        self.core_temperatures = [cpu_temp for cpu_temp in cpu_temperatures.values()]
+        self.core_temperatures = list(cpu_temperatures.values())
