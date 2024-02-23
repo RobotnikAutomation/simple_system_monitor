@@ -58,6 +58,7 @@
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>rcomponent</exec_depend>
+  <exec_depend>robotnik_msgs</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
