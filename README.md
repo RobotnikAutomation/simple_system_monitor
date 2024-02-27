@@ -54,7 +54,7 @@ It publishes the system status
 
 ### 1.1 Published Topics
 
-* simple_system_monitor/system_status (robotnik_msgs/SimpleSystemStatus):
+* ~/status (robotnik_msgs/SimpleSystemStatus):
   * System status, publishes the following info:
     * disk_capacity: float32
     * disk_usage: float32
