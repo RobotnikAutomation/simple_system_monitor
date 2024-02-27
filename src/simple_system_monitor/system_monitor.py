@@ -39,9 +39,8 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
         """Actions performed in init state"""
         return RComponent.init_state(self)
 
-    def ros_publish(self):
-        """Publish to ROS topics"""
-        RComponent.ros_publish(self)
+    def publish_status(self):
+        """Publishes the status"""
 
         system_status = SimpleSystemStatus()
         system_status.disk_capacity = self.disk_capacity
@@ -57,9 +56,8 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
 
     def ready_state(self):
         """Actions performed in ready state"""
-        RComponent.ready_state(self)
-
         self.update_system_status()
+        self.publish_status()
 
     def update_system_status(self):
         """Updates the system status readings"""
