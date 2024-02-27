@@ -32,7 +32,7 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
         RComponent.ros_setup(self)
 
         self.simple_system_status_publisher = rospy.Publisher(
-            '~system_status', SimpleSystemStatus, queue_size=10)
+            '~status', SimpleSystemStatus, queue_size=10)
 
     def init_state(self) -> None:
         """Actions performed in init state"""
