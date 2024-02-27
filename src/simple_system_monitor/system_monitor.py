@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """simple_system_monitor ROS node"""
 
-import time
 import psutil
 import rospy
 from rcomponent.rcomponent import RComponent  # pylint: disable=import-error, no-name-in-module
