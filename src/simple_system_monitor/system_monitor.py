@@ -4,11 +4,11 @@
 import time
 import psutil
 import rospy
-from rcomponent.rcomponent import RComponent # pylint: disable=import-error, no-name-in-module
+from rcomponent.rcomponent import RComponent  # pylint: disable=import-error, no-name-in-module
 from robotnik_msgs.msg import SimpleSystemStatus
 
 
-class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attributes
+class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attributes
     """SimpleSystemMonitor class, which contains all the logic of the simple_system_monitor ROS node"""
 
     def __init__(self):
@@ -32,7 +32,8 @@ class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attri
         """Creates and inits ROS components"""
         RComponent.ros_setup(self)
 
-        self.simple_system_status_publisher = rospy.Publisher('~system_status', SimpleSystemStatus, queue_size=10)
+        self.simple_system_status_publisher = rospy.Publisher(
+            '~system_status', SimpleSystemStatus, queue_size=10)
 
     def init_state(self) -> None:
         """Actions performed in init state"""
@@ -73,11 +74,14 @@ class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attri
         # Update CPU usage and temperature
         self.cpu_usage = psutil.cpu_percent()
         cpu_temperatures = {}
-        for sensor_data in psutil.sensors_temperatures()['coretemp']:
-            if 'core' in sensor_data.label.lower():
-                cpu_temperatures[sensor_data.label] = sensor_data.current
-            elif 'Package id 0' == sensor_data.label:
-                self.cpu_temperature = sensor_data.current
+        try:
+            for sensor_data in psutil.sensors_temperatures()['coretemp']:
+                if 'core' in sensor_data.label.lower():
+                    cpu_temperatures[sensor_data.label] = sensor_data.current
+                elif 'Package id 0' == sensor_data.label:
+                    self.cpu_temperature = sensor_data.current
+        except KeyError:
+            self.cpu_temperature = 0.0
 
         # Order the dictionary as list to get the temperature for ordered cores
         keys = [int(key[5:]) for key in cpu_temperatures]

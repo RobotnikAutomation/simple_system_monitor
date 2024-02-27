@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from simple_system_monitor import SimpleSystemMonitor
+from system_monitor import SimpleSystemMonitor
 
 
 def main():
