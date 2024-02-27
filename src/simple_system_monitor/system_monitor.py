@@ -71,12 +71,20 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
         # Update CPU usage and temperature
         self.cpu_usage = psutil.cpu_percent()
         cpu_temperatures = {}
+        self.cpu_temperature = 0.0
         try:
-            for sensor_data in psutil.sensors_temperatures()['coretemp']:
-                if 'core' in sensor_data.label.lower():
-                    cpu_temperatures[sensor_data.label] = sensor_data.current
-                elif 'Package id 0' == sensor_data.label:
-                    self.cpu_temperature = sensor_data.current
+            temperatures = psutil.sensors_temperatures()
+            for sensor in temperatures:
+                sensor_data = psutil.sensors_temperatures()[sensor]
+                # Intel Arch ?
+                if sensor == 'coretemp':
+                    if 'core' in sensor_data.label.lower():
+                        cpu_temperatures[sensor_data.label] = sensor_data.current
+                    elif 'Package id 0' == sensor_data.label:
+                        self.cpu_temperature = sensor_data.current
+                # AMD Arch ?
+                elif sensor == 'acpitz':
+                    self.cpu_temperature = float(sensor_data[0][1])
         except KeyError:
             self.cpu_temperature = 0.0
 
