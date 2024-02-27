@@ -2,7 +2,7 @@
 <launch>
 
 	<!-- Desired frequency -->
-	<arg name="desired_freq" default="0.2" />
+	<arg name="desired_freq" default="1" />
 
 	<!-- Load SimpleSystemMonitor configuration -->
 	<arg name="simple_system_monitor_config_path" default="$(find simple_system_monitor)/config/simple_system_monitor_config.yaml" />
