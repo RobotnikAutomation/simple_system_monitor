@@ -51,7 +51,7 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
         system_status.cpu_usage = self.cpu_usage
         system_status.core_temperatures = self.core_temperatures
         system_status.cpu_temperature = self.cpu_temperature
-        system_status.timestamp = str(time.time())
+        system_status.header.stamp = rospy.Time.now()
 
         self.simple_system_status_publisher.publish(system_status)
 
