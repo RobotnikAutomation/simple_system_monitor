@@ -19,6 +19,7 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
         self.memory_capacity = -1.
         self.memory_usage = -1.
         self.cpu_usage = -1.
+        self.core_usage = []
         self.cpu_temperature = -1.
         self.core_temperatures = []
         self.simple_system_status_publisher = None
@@ -48,6 +49,7 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
         system_status.memory_usage = self.memory_usage
         system_status.cpu_usage = self.cpu_usage
         system_status.core_temperatures = self.core_temperatures
+        system_status.core_usage = self.core_usage
         system_status.cpu_temperature = self.cpu_temperature
         system_status.header.stamp = rospy.Time.now()
 
@@ -70,6 +72,7 @@ class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attr
 
         # Update CPU usage and temperature
         self.cpu_usage = psutil.cpu_percent()
+        self.core_usage = psutil.cpu_percent(interval=None, percpu=True)
         cpu_temperatures = {}
         self.cpu_temperature = 0.0
         try:
