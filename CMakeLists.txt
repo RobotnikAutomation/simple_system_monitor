@@ -55,7 +55,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/simple_system_monitor/simple_system_monitor.py
+  src/simple_system_monitor/system_monitor.py
   src/simple_system_monitor/simple_system_monitor_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
