@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """simple_system_monitor ROS node"""
 
-import time
 import psutil
 import rospy
-from rcomponent.rcomponent import RComponent # pylint: disable=import-error, no-name-in-module
+from rcomponent.rcomponent import RComponent  # pylint: disable=import-error, no-name-in-module
 from robotnik_msgs.msg import SimpleSystemStatus
 
 
-class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attributes
+class SimpleSystemMonitor(RComponent):  # pylint: disable=too-many-instance-attributes
     """SimpleSystemMonitor class, which contains all the logic of the simple_system_monitor ROS node"""
 
     def __init__(self):
@@ -20,6 +19,7 @@ class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attri
         self.memory_capacity = -1.
         self.memory_usage = -1.
         self.cpu_usage = -1.
+        self.core_usage = []
         self.cpu_temperature = -1.
         self.core_temperatures = []
         self.simple_system_status_publisher = None
@@ -32,15 +32,15 @@ class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attri
         """Creates and inits ROS components"""
         RComponent.ros_setup(self)
 
-        self.simple_system_status_publisher = rospy.Publisher('~system_status', SimpleSystemStatus, queue_size=10)
+        self.simple_system_status_publisher = rospy.Publisher(
+            '~status', SimpleSystemStatus, queue_size=10)
 
     def init_state(self) -> None:
         """Actions performed in init state"""
         return RComponent.init_state(self)
 
-    def ros_publish(self):
-        """Publish to ROS topics"""
-        RComponent.ros_publish(self)
+    def publish_status(self):
+        """Publishes the status"""
 
         system_status = SimpleSystemStatus()
         system_status.disk_capacity = self.disk_capacity
@@ -49,16 +49,16 @@ class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attri
         system_status.memory_usage = self.memory_usage
         system_status.cpu_usage = self.cpu_usage
         system_status.core_temperatures = self.core_temperatures
+        system_status.core_usage = self.core_usage
         system_status.cpu_temperature = self.cpu_temperature
-        system_status.timestamp = str(time.time())
+        system_status.header.stamp = rospy.Time.now()
 
         self.simple_system_status_publisher.publish(system_status)
 
     def ready_state(self):
         """Actions performed in ready state"""
-        RComponent.ready_state(self)
-
         self.update_system_status()
+        self.publish_status()
 
     def update_system_status(self):
         """Updates the system status readings"""
@@ -72,12 +72,23 @@ class SimpleSystemMonitor(RComponent): # pylint: disable=too-many-instance-attri
 
         # Update CPU usage and temperature
         self.cpu_usage = psutil.cpu_percent()
+        self.core_usage = psutil.cpu_percent(interval=None, percpu=True)
         cpu_temperatures = {}
-        for sensor_data in psutil.sensors_temperatures()['coretemp']:
-            if 'core' in sensor_data.label.lower():
-                cpu_temperatures[sensor_data.label] = sensor_data.current
-            elif 'Package id 0' == sensor_data.label:
-                self.cpu_temperature = sensor_data.current
+        self.cpu_temperature = 0.0
+        try:
+            for sensor_type, sensor_data_lst in psutil.sensors_temperatures().items():
+                # Intel Arch ?
+                if sensor_type == 'coretemp':
+                    for sensor_data in sensor_data_lst:
+                        if 'core' in sensor_data.label.lower():
+                            cpu_temperatures[sensor_data.label] = sensor_data.current
+                        elif 'Package id 0' == sensor_data.label:
+                            self.cpu_temperature = sensor_data.current
+                # AMD Arch ?
+                elif sensor_type == 'acpitz':
+                    self.cpu_temperature = float(sensor_data_lst[0][1])
+        except KeyError:
+            self.cpu_temperature = 0.0
 
         # Order the dictionary as list to get the temperature for ordered cores
         keys = [int(key[5:]) for key in cpu_temperatures]
