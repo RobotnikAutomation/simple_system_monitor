@@ -4,14 +4,16 @@
 	<!-- Desired frequency -->
 	<arg name="desired_freq" default="0.2" />
 
-	<!-- Load SimpleSystemMonitor configuration -->
-	<arg name="simple_system_monitor_config_path" default="$(find simple_system_monitor)/config/simple_system_monitor_config.yaml" />
-	<rosparam file="$(arg simple_system_monitor_config_path)" command="load" />
+	<group ns="robot">
+		<!-- Load SimpleSystemMonitor configuration -->
+		<arg name="simple_system_monitor_config_path" default="$(find simple_system_monitor)/config/simple_system_monitor_config.yaml" />
+		<rosparam file="$(arg simple_system_monitor_config_path)" command="load" />
 
-	<!-- Start simple_system_monitor node -->
-	<node pkg="simple_system_monitor" name="simple_system_monitor" type="simple_system_monitor_node.py" output="screen">
-		<param name="desired_freq" value="$(arg desired_freq)"/>
-	</node>
+		<!-- Start simple_system_monitor node -->
+		<node pkg="simple_system_monitor" name="simple_system_monitor" type="simple_system_monitor_node.py" output="screen">
+			<param name="desired_freq" value="$(arg desired_freq)"/>
+		</node>
+	</group>
 
 
 </launch>
