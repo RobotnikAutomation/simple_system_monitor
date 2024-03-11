@@ -2,7 +2,7 @@
 <launch>
 
 	<!-- Desired frequency -->
-	<arg name="desired_freq" default="0.2" />
+	<arg name="desired_freq" default="1" />
 
 	<group ns="robot">
 		<!-- Load SimpleSystemMonitor configuration -->

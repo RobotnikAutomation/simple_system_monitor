@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from simple_system_monitor import SimpleSystemMonitor
+
+try:
+    from system_monitor import SimpleSystemMonitor
+except ImportError:
+    from simple_system_monitor.system_monitor import SimpleSystemMonitor
 
 
 def main():
